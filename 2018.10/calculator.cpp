@@ -23,8 +23,7 @@ queue<string> ConvertToRpn(string s,map<string,int>p,map<char,int>p_char){
 	queue<string>sk2;
 	sk1.push("#");
 	for (int i = 0; i < length;){
-		//if (isdigit(s[i])){//判断字符是否是0~9的数字
-		if (s[i] == '1' || s[i] == '2' || s[i] == '3' || s[i] == '4' || s[i] == '5' || s[i] == '6' || s[i] == '7' || s[i] == '8' || s[i] == '9'){
+		if (isdigit(s[i])){//判断字符是否是0~9的数字
 			while (isdigit(s[i]) || s[i] == '.'){
 				temp_s = temp_s + s[i];
 				i++;
@@ -75,6 +74,51 @@ queue<string> ConvertToRpn(string s,map<string,int>p,map<char,int>p_char){
 	}
 	return sk2;
 }
+double calculate(double n1, double n2, char c){
+	double result = 0;
+	if (c == '+'){
+		result = n1 + n2;
+	}
+	else if (c == '-'){
+		result = n2 - n1;
+	}
+	else if (c == '*'){
+		result = n1*n2;
+	}
+	else if (c == '/'){
+		result = n2 / n1;
+	}
+	return result;
+}
+double operation(queue<string> q){
+	stack<double> temp_for_digit;
+	char temp_for_char;
+	double temp_for_push = 0;
+	double num1, num2;
+	double temp_result = 0;
+	int length = q.size();
+	stringstream ss;
+	while (q.size() != 0){
+		if (isdigit(q.front()[0])){
+			ss << q.front();
+			ss >> temp_for_push;
+			temp_for_digit.push(temp_for_push);
+			q.pop();
+			ss.clear();
+		}
+		else{
+			temp_for_char = q.front()[0];
+			q.pop();
+			num1 = temp_for_digit.top();
+			temp_for_digit.pop();
+			num2 = temp_for_digit.top();
+			temp_for_digit.pop();
+			temp_result = calculate(num1, num2, temp_for_char);
+			temp_for_digit.push(temp_result);
+		}
+	}
+	return temp_result;
+}
 int main(){
 	map<string, int> priorites;
 	priorites["+"] = 1;
@@ -90,9 +134,11 @@ int main(){
 	priorites_char['^'] = 3;
 	string expression;
 	queue<string> RPN;
+	double result;
 	cout << "please enter the expression:" << endl;
 	cin >> expression;
 	RPN = ConvertToRpn(expression,priorites,priorites_char);//得到后缀表达式
+	result = operation(RPN);
 	system("pause");
 	return 0;
 }
