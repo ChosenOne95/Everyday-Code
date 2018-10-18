@@ -12,6 +12,7 @@
 #include<stack>
 #include<queue>
 #include<map>
+#include<fstream>
 using namespace std;
 
 //将中缀表达式转换为逆波兰式
@@ -74,7 +75,7 @@ queue<string> ConvertToRpn(string s,map<string,int>p,map<char,int>p_char){
 	}
 	return sk2;
 }
-double calculate(double n1, double n2, char c){
+double Calculate(double n1, double n2, char c){
 	double result = 0;
 	if (c == '+'){
 		result = n1 + n2;
@@ -90,7 +91,7 @@ double calculate(double n1, double n2, char c){
 	}
 	return result;
 }
-double operation(queue<string> q){
+double Operation(queue<string> q){
 	stack<double> temp_for_digit;
 	char temp_for_char;
 	double temp_for_push = 0;
@@ -113,11 +114,90 @@ double operation(queue<string> q){
 			temp_for_digit.pop();
 			num2 = temp_for_digit.top();
 			temp_for_digit.pop();
-			temp_result = calculate(num1, num2, temp_for_char);
+			temp_result = Calculate(num1, num2, temp_for_char);
 			temp_for_digit.push(temp_result);
 		}
 	}
 	return temp_result;
+}
+char GenerateOperator(){
+	char result;
+	int which = rand() % 6;
+	if (which == 0 || which == 4){
+		result = '+';
+	}
+	else if (which == 1 || which == 5){
+		result = '-';
+	}
+	else if (which == 2){
+		result = '*';
+	}
+	else if (which == 3){
+		result = '/';
+	}
+	return result;
+}
+int GenerateLeftBracket(){
+	int result = 0;
+	int whether_bracket = rand() % 7;
+	if (whether_bracket ==1){
+		result = 1;
+	}
+	return result;
+}
+int GenerateRightBracket(){
+	int result = 0;
+	int whether_bracket = rand() % 7;
+	if (whether_bracket <= 5){
+		result = 1;
+	}
+	return result;
+}
+string GenerateExpression(){
+	string expression = "";
+	string temp_string;
+	int count_right_bracket = 0;
+	int length = 3;
+	int location_for_last_bracket = 0;
+	length += 2*(rand() % 30);
+	stringstream ss;
+	double temp_num;
+	int whether_int = 0;
+	int whether_bracket = 0;
+	whether_int = rand() % 5;
+	for (int i = 0; i < length; i++){
+		if (i % 2 == 0){
+			temp_num = (15 + (double)rand()) / (double)rand();
+			int temp_int_for_transform = temp_num * 10;
+			temp_num = ((double)temp_int_for_transform) / 10;//限定一位小数
+			if (whether_int <= 1){//40%生成纯整数算式
+				temp_num = (int)temp_num;
+			}
+			ss << temp_num;
+			ss >> temp_string;
+			expression += temp_string;
+			ss.clear();
+			if (count_right_bracket&&i>=location_for_last_bracket+3){
+				if (GenerateRightBracket()){
+					count_right_bracket -= 1;
+					expression += ')';
+				}
+			}
+		}
+		else{
+			expression += GenerateOperator();
+			whether_bracket= GenerateLeftBracket();
+			if (whether_bracket == 1){
+				expression += '(';
+				count_right_bracket += whether_bracket;
+				location_for_last_bracket = i;
+			}
+		}
+	}
+	while ((count_right_bracket--) != 0){
+		expression += ')';
+	}
+	return expression;
 }
 int main(){
 	map<string, int> priorites;
@@ -135,10 +215,24 @@ int main(){
 	string expression;
 	queue<string> RPN;
 	double result;
-	cout << "please enter the expression:" << endl;
-	cin >> expression;
-	RPN = ConvertToRpn(expression,priorites,priorites_char);//得到后缀表达式
-	result = operation(RPN);
+	int count_expression;
+	ofstream just_expression, answer;
+	just_expression.open("expression.txt");
+	answer.open("answer.txt");
+	cout << "how many expressions do you want: " << endl;
+	cin >> count_expression;
+	for (int i = 0; i<count_expression; i++){
+		expression = GenerateExpression();
+		RPN = ConvertToRpn(expression,priorites,priorites_char);//得到后缀表达式
+		result = Operation(RPN);
+		just_expression << i+1 << ".  " << expression << endl;
+		answer << i+1 << ".  " << expression << " = " << result << endl;
+		expression.clear();
+		RPN = queue<string>();//清空当前队列
+	}
+	just_expression.close();
+	answer.close();
+	cout << "finished" << endl;
 	system("pause");
 	return 0;
 }
