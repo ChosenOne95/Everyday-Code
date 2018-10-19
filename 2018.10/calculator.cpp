@@ -75,6 +75,20 @@ queue<string> ConvertToRpn(string s,map<string,int>p,map<char,int>p_char){
 	}
 	return sk2;
 }
+double GeneratNumber(){
+	double number;
+	int temp;
+	number = ((double)rand()) / ((double)(rand()/50));
+	temp = number * 10;
+	number = ((double)temp) / 10;
+	number = number - (int)number + (int)number % 49;
+	return number;
+}
+int GenerateInt(){
+	double int_number;
+	int_number = rand() % 49;
+	return int_number;
+}
 double Calculate(double n1, double n2, char c){
 	double result = 0;
 	if (c == '+'){
@@ -159,19 +173,19 @@ string GenerateExpression(){
 	int count_right_bracket = 0;
 	int length = 3;
 	int location_for_last_bracket = 0;
-	length += 2*(rand() % 30);
+	length += 2*(rand() % 15);
 	stringstream ss;
 	double temp_num;
 	int whether_int = 0;
 	int whether_bracket = 0;
-	whether_int = rand() % 5;
 	for (int i = 0; i < length; i++){
+		whether_int = rand() % 5;
 		if (i % 2 == 0){
-			temp_num = (15 + (double)rand()) / (double)rand();
-			int temp_int_for_transform = temp_num * 10;
-			temp_num = ((double)temp_int_for_transform) / 10;//限定一位小数
-			if (whether_int <= 1){//40%生成纯整数算式
-				temp_num = (int)temp_num;
+			if (whether_int <= 3){//80%生成整数
+				temp_num = GenerateInt();
+			}
+			else{
+				temp_num = GeneratNumber();
 			}
 			ss << temp_num;
 			ss >> temp_string;
